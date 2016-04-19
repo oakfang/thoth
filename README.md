@@ -17,3 +17,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
         def application do
           [applications: [:thoth]]
         end
+
+### Notes
+
+Use `Thoth.Query.find` for graphs with fewer than 550 vertices, otherwise use Thoth.Async.find :)
