@@ -1,0 +1,2 @@
+defmodule Thoth do
+end
