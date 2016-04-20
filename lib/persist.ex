@@ -1,4 +1,8 @@
 defmodule Thoth.Persistence do
+    def auto_persist(graph, path, interval) do
+        :timer.apply_interval(interval, Thoth.Persistence, :save, [graph, path])
+    end
+
     def delete graph do
         :digraph.delete(graph)
     end
@@ -21,5 +25,11 @@ defmodule Thoth.Persistence do
                 {:digraph, t1, t2, t3, true}
             _ -> :digraph.new
         end
+    end
+
+    def load(path, interval) do
+        g = load path
+        auto_persist(g, path, interval)
+        g
     end
 end
