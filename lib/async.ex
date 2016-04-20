@@ -8,6 +8,15 @@ defmodule Thoth.Async do
         end
     end
 
+    defp limited_recv_loop(vids, 0), do: vids
+
+    defp limited_recv_loop(vids, n) do
+        receive do
+            {:ok, vid} -> limited_recv_loop([vid|vids], n - 1)
+            _ -> limited_recv_loop(vids, n)
+        end
+    end
+
     defp spawn_chunk(graph, loop, filter, vtype, vids) do
         spawn_link(fn ->
             Enum.each vids, fn vid ->
@@ -34,6 +43,15 @@ defmodule Thoth.Async do
     def find(graph, vtype, filter) do
         parent = self()
         rcv = spawn_link fn -> send(parent, recv_loop([], :digraph.no_vertices(graph))) end
+        remote_filter(graph, rcv, filter, vtype, :digraph.vertices(graph), round(Float.ceil(:digraph.no_vertices(graph) / 10.5)))
+        receive do
+            vids -> vids
+        end
+    end
+
+    def find(graph, vtype, filter, limit) do
+        parent = self()
+        rcv = spawn_link fn -> send(parent, limited_recv_loop([], limit)) end
         remote_filter(graph, rcv, filter, vtype, :digraph.vertices(graph), round(Float.ceil(:digraph.no_vertices(graph) / 10.5)))
         receive do
             vids -> vids

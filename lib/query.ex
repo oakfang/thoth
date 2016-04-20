@@ -50,4 +50,13 @@ defmodule Thoth.Query do
             Thoth.Sync.find(graph, vtype, filter)
         end
     end
+
+    def find(graph, vtype, filter, limit) when is_function(filter, 1) do
+        nov = :digraph.no_vertices(graph)
+        if nov > 950 and nov < 810_000 do
+            Thoth.Async.find(graph, vtype, filter, limit)
+        else
+            Thoth.Sync.find(graph, vtype, filter, limit)
+        end
+    end
 end

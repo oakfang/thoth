@@ -76,4 +76,9 @@ defmodule QueryTest do
         graph = context[:graph]
         assert length(Thoth.Query.find(graph, :human, fn %{name: name} -> String.ends_with?(name, "zz") end)) == 2
     end
+
+    test "limited querying", context do
+        graph = context[:graph]
+        assert length(Thoth.Query.find(graph, :human, fn %{name: name} -> String.ends_with?(name, "zz") end, 1)) == 1
+    end
 end
