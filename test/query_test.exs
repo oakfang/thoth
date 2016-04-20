@@ -3,13 +3,8 @@ defmodule Animal do
 end
 
 defmodule Human do
+    @derive Thoth.Model
     defstruct type: :human, name: nil, age: nil
-end
-
-defimpl Thoth.Model, for: Human do
-    def id(%{name: name}) do
-        name |> String.downcase |> String.to_atom
-    end
 end
 
 defimpl Thoth.Model, for: Animal do
@@ -21,19 +16,8 @@ end
 defmodule QueryTest do
     require Thoth.Entities
     require Thoth.Query
-    require Thoth.Async
-
-    require Benchwarmer
 
     use ExUnit.Case
-
-    defp repat _, 0 do
-        ""
-    end
-
-    defp repat t, n do
-        t <> repat(t, n - 1)
-    end
 
     setup_all do
         gr = :digraph.new
@@ -50,19 +34,19 @@ defmodule QueryTest do
         x2 = Thoth.Entities.add!(gr, %Human{name: "Buzzr", age: 19})
         x3 = Thoth.Entities.add!(gr, %Human{name: "Fuzzr", age: 13})
 
-        for n <- 1..50 do
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Foo", age: 20})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Bar", age: 21})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Buzz_", age: 19})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Fuzz_", age: 13})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Fool", age: 20})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Barl", age: 21})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Buzzl", age: 19})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Fuzzl", age: 13})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Foor", age: 20})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Barr", age: 21})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Buzzr", age: 19})
-            Thoth.Entities.add!(gr, %Human{name: repat("_", n) <> "Fuzzr", age: 13})
+        for _ <- 1..100 do
+            Thoth.Entities.add!(gr, %Human{name: "Foo", age: 20})
+            Thoth.Entities.add!(gr, %Human{name: "Bar", age: 21})
+            Thoth.Entities.add!(gr, %Human{name: "Buzz_", age: 19})
+            Thoth.Entities.add!(gr, %Human{name: "Fuzz_", age: 13})
+            Thoth.Entities.add!(gr, %Human{name: "Fool", age: 20})
+            Thoth.Entities.add!(gr, %Human{name: "Barl", age: 21})
+            Thoth.Entities.add!(gr, %Human{name: "Buzzl", age: 19})
+            Thoth.Entities.add!(gr, %Human{name: "Fuzzl", age: 13})
+            Thoth.Entities.add!(gr, %Human{name: "Foor", age: 20})
+            Thoth.Entities.add!(gr, %Human{name: "Barr", age: 21})
+            Thoth.Entities.add!(gr, %Human{name: "Buzzr", age: 19})
+            Thoth.Entities.add!(gr, %Human{name: "Fuzzr", age: 13})
         end
 
         a1 = Thoth.Entities.add!(gr, %Animal{name: "Fluffy",  kind: :dog})
@@ -90,12 +74,6 @@ defmodule QueryTest do
 
     test "Basic finding", context do
         graph = context[:graph]
-        IO.puts ""
-        Benchwarmer.benchmark [&Thoth.Query.find/3, &Thoth.Async.find/3], [graph, 
-                                                                           :human,
-                                                                           fn %{name: name} -> String.ends_with?(name, "zz")  end]
-        IO.puts ""
         assert length(Thoth.Query.find(graph, :human, fn %{name: name} -> String.ends_with?(name, "zz") end)) == 2
-        assert length(Thoth.Async.find(graph, :human, fn %{name: name} -> String.ends_with?(name, "zz") end)) == 2
     end
 end

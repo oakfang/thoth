@@ -24,21 +24,17 @@ defmodule Thoth.Async do
         end)
     end
 
-    defp remote_filter(graph, loop, filter, vtype, [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10|vids]) do
-        spawn_chunk(graph, loop, filter, vtype, [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10])
-        remote_filter(graph, loop, filter, vtype, vids)
-    end
+    defp remote_filter(_, _, _, _, [], _), do: nil
 
-    defp remote_filter(_, _, _, _, []), do: nil
-
-    defp remote_filter(graph, loop, filter, vtype, vids) do
-        spawn_chunk(graph, loop, filter, vtype, vids)
+    defp remote_filter(graph, loop, filter, vtype, vids, chunk_size) do
+        spawn_chunk(graph, loop, filter, vtype, Enum.take(vids, chunk_size))
+        remote_filter(graph, loop, filter, vtype, Enum.drop(vids, chunk_size), chunk_size)
     end
 
     def find(graph, vtype, filter) do
         parent = self()
         rcv = spawn_link fn -> send(parent, recv_loop([], :digraph.no_vertices(graph))) end
-        remote_filter(graph, rcv, filter, vtype, :digraph.vertices(graph))
+        remote_filter(graph, rcv, filter, vtype, :digraph.vertices(graph), round(Float.ceil(:digraph.no_vertices(graph) / 10.5)))
         receive do
             vids -> vids
         end

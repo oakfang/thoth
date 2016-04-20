@@ -4,7 +4,7 @@ defmodule Thoth.Mixfile do
   def project do
     [app: :thoth,
      description: "An Elixir digraph inspired local Graph DB",
-     version: "0.0.1",
+     version: "0.0.2",
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -21,7 +21,7 @@ defmodule Thoth.Mixfile do
   end
 
   defp deps do
-    [{:benchwarmer, "~> 0.0.2" }]
+    []
   end
 
   defp package do

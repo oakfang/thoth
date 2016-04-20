@@ -1,4 +1,7 @@
 defmodule Thoth.Query do
+    require Thoth.Async
+    require Thoth.Sync
+
     defp query_shallow_flat(graph, vids, edge_type) when is_atom(edge_type) do
         Enum.flat_map(vids, fn vid ->
             :digraph.out_edges(graph, vid)
@@ -36,20 +39,15 @@ defmodule Thoth.Query do
     def query(graph, vid, path), do: query(graph, [vid], path)
 
     def find(graph, vtype) do
-        Enum.filter(:digraph.vertices(graph), fn vid ->
-            case :digraph.vertex(graph, vid) do
-                {^vid, %{type: ^vtype}} -> true
-                _ -> false
-            end
-        end)
+        find(graph, vtype, fn _ -> true end)
     end
 
     def find(graph, vtype, filter) when is_function(filter, 1) do
-        Enum.filter(:digraph.vertices(graph), fn vid ->
-            case :digraph.vertex(graph, vid) do
-                {^vid, %{type: ^vtype}=n} -> filter.(n)
-                _ -> false
-            end
-        end)
+        nov = :digraph.no_vertices(graph)
+        if nov > 950 and nov < 810_000 do
+            Thoth.Async.find(graph, vtype, filter)
+        else
+            Thoth.Sync.find(graph, vtype, filter)
+        end
     end
 end
