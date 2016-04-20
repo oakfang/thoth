@@ -9,7 +9,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
   1. Add thoth to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:thoth, "~> 0.0.3"}]
+          [{:thoth, "~> 0.0.5"}]
         end
 
   2. Ensure thoth is started before your application:
@@ -44,7 +44,7 @@ defimpl Thoth.Model, for: Place do
     end
 end
 
-# It can also derive it for the default "random 12 bytes" implementation
+# It can also derive it for the default "UUIDv4" implementation
 defmodule Post do
     @derive Thoth.Model
     defstruct type: :post, text: nil, is_comment: false

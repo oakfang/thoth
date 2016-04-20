@@ -20,14 +20,18 @@ defmodule Thoth.Async do
     defp spawn_chunk(graph, loop, filter, vtype, vids) do
         spawn_link(fn ->
             Enum.each vids, fn vid ->
-                case :digraph.vertex(graph, vid) do
-                    {^vid, %{type: ^vtype}=node} ->
-                        if filter.(node) do
-                            send(loop, {:ok, vid})
-                        else
-                            send(loop, nil)
-                        end
-                    _ -> send(loop, nil)
+                try do
+                    case :digraph.vertex(graph, vid) do
+                        {^vid, %{type: ^vtype}=node} ->
+                            if filter.(node) do
+                                send(loop, {:ok, vid})
+                            else
+                                send(loop, nil)
+                            end
+                        _ -> send(loop, nil)
+                    end
+                rescue
+                    ArgumentError -> Process.exit(self(), :normal)
                 end
             end
         end)

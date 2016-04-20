@@ -34,7 +34,7 @@ defmodule QueryTest do
         x2 = Thoth.Entities.add!(gr, %Human{name: "Buzzr", age: 19})
         x3 = Thoth.Entities.add!(gr, %Human{name: "Fuzzr", age: 13})
 
-        for _ <- 1..100 do
+        for _ <- 1..500 do
             Thoth.Entities.add!(gr, %Human{name: "Foo", age: 20})
             Thoth.Entities.add!(gr, %Human{name: "Bar", age: 21})
             Thoth.Entities.add!(gr, %Human{name: "Buzz_", age: 19})

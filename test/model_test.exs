@@ -8,6 +8,8 @@ defmodule ModelTest do
     use ExUnit.Case
 
     test "Default id function works" do
-      assert String.length(Thoth.Model.id(%Foo{})) === 24
+        id = Thoth.Model.id(%Foo{})
+        assert String.at(id, 14) === "4"
+        assert String.length(id) === 36
     end
 end
